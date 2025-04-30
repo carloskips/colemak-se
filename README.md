@@ -24,48 +24,63 @@ macOS supports this by default (System preferences → Keyboard → Modifiers Ke
 ### Linux
 The Linux implementation of Colemak-SE aims to mirror the [English Colemak website](https://colemak.com/Unix). There are a few diffient ways to do it, all with thier neuances.
 
-##### xmodmap
-`xmodmap` is a utility for modifying keymaps in `Xorg`. It modifies the layout temporarily and does not require root access.
+##### xkb with KDE compatibility
+1. Edit the `se` file in `/usr/share/X11/symbols/` to add the colemak variant.
 
-1. Download the `xmodmap release`.
-2. Open a terminal window and navigate to the file.
-3. Run the shell command:
-```bash
-$ setxkbmap se && xmodmap xmodmap.colemak-se && xset -r 66
+```
+partial alphanumeric_keys
+xkb_symbols "colemak" {
+
+	include "se(basic)"
+
+	name[Group1]="Swedish (Colemak)";
+
+	// top row
+	key <AD03> { [ f, F ] };
+	key <AD04> { [ p, P ] };
+	key <AD05> { [ g, G ] };
+	key <AD06> { [ j, J ] };
+	key <AD07> { [ l, L ] };
+	key <AD08> { [ u, U ] };
+	key <AD09> { [ y, Y ] };
+	key <AD10> { [ odiaeresis, Odiaeresis ] };
+	key <AD11> { [ aring, Aring ] };
+
+	// home row
+	key <AC02> { [ r, R ] };
+	key <AC03> { [ s, S ] };
+	key <AC04> { [ t, T ] };
+	key <AC05> { [ d, D ] };
+	key <AC06> { [ h, H ] };
+	key <AC07> { [ n, N ] };
+	key <AC08> { [ e, E ] };
+	key <AC09> { [ i, I ] };
+	key <AC10> { [ o, O ] };
+
+	// bottom row
+	key <AB06> { [ k, K ] };
+
+};
 ```
 
-If you want to restore QWERTY, run the following:
-```bash
-$ setxkbmap se && xset -r 66
+2. Add this line in `/usr/share/X11/xkb/rules/evdev.lst` under the !variant section. 
+
+```
+colemak         se: Swedish (Colemak)
 ```
 
-#### xkb
-xmodmap is best used as a to temporary test the layout, as changes applied to it don't last over sessions. A more permanent way is to use Xorgs xkb.
+3. Search for "swedish" in `/usr/share/X11/xkb/rules/evdev.xml` and find `<!-- Keyboard indicator for Swedish layouts -->`. Add this somewhere around the dvorak entry.
+   ```
+   <variant>
+          <configItem>
+            <name>colemak</name>
+            <description>Swedish (Colemak)</description>
+          </configItem>
+   </variant>
+   ```
 
-1. Download the `xkb release`.
-2. Open a terminal window and navigate to the file.
-3. Copy the file to the place where xkb saves keymaps (might be diffirent depending on you version):
-```bash
-$ sudo cp colemak-se /usr/share/X11/xkb/symbols
-```
-4. Make sure everthing works:
-```bash
-$ setxkbmap -v colemak-se && xset r 66
-```
-If something is acting up, you can switch back to qwerty with: `setxkbmap se; xset -r 66`
-5. To make the changes permanent, you need to add them to your xorg.conf.  Again, this might be different depending on your installation. Many modern distributions use the convention of a `/usr/share/X11/xorg.conf.d`, separating the diffirent parts of the config. I like to keep my layout configuration in the file `00-keyboard.conf`.
-```conf
-Section "InputClass"
-        Identifier "system-keyboard"
-        MatchIsKeyboard "on"
-        Option "XkbLayout" "colemak-se"
-        Option "XkbRules" "xorg"
-        Option "XkbSymbols" "pc+colemak-se+inet(evdev)"
-        Option "XkbModel" "pc104"
-        Option "CoreKeyboard"
-EndSection
-```
-You might need to do some configuration on your own, depending on what type of keyboard you are using.
+4. Open up KDE settings and select the Swedish -> Colemak layout!
+
 
 ### macOS
 To install the layout, simply put the `colemak-se.bundle` in the folder `/Library/Keyboard Layouts`. This will install the layout on a system level, which is usually what you want. If you prefer to have the layout on a user level, place it in the user library instead `~/Library/Keyboard Layouts`.
